@@ -1,0 +1,46 @@
+﻿{0,
+{a2e03d03-5f1e-4ef0-8b57-12ab82c338bf,"Локальный кластер",1541,"1c-srv-dev",0,0,0,60,0,0,0,
+{1,
+{"1c-srv-dev",1542}
+},0,0,1,0},
+{3,
+{0b196f3a-243a-45be-8b9c-7cf151acdf30,"TestIb_1","","MSSQLServer","localhost","TestIb_2","fgddd","dsfdsdfgdfg","CrSQLDB=Y;DB=TestIb_1;DBMS=MSSQLServer;DBSrvr=localhost;DBUID=aa;LIC=4495114545648940103;LicDstr=Y;Locale=ru_RU;Ref=TestIb_2;SLev=0;SQLYOffs=2000;Srvr=localhost;SUsr=",0,
+{0,00010101000000,00010101000000,"","","",0},0,1,"",0,"","",449,0}
+{0b196f3a-243a-45be-8b9c-7cf151acdf30,"TestIb_2","","MSSQLServer","localhost","TestIb_1","gfgf","aasdasdasd","CrSQLDB=Y;DB=TestIb_1;DBMS=MSSQLServer;DBSrvr=localhost;DBUID=aa;Descr=;LicDstr=Y;Locale=ru_RU;Ref=TestIb_1;SLev=0;SQLYOffs=2000;Srvr=1c-srv-dev",0,
+{0,00010101000000,00010101000000,"","","",0},0,1,"",0,"","",448,0},
+{fc6bb85f-3b1a-4328-9f84-5b02e31b4c70,"TestIb_3","","MSSQLServer","localhost","TestIb_2","fgddd","dsfdsdfgdfg","CrSQLDB=Y;DB=TestIb_1;DBMS=MSSQLServer;DBSrvr=localhost;DBUID=aa;LIC=4495114545648940103;LicDstr=Y;Locale=ru_RU;Ref=TestIb_2;SLev=0;SQLYOffs=2000;Srvr=localhost;SUsr=",0,
+{0,00010101000000,00010101000000,"","","",0},0,1,"",0,"","",449,0}
+},
+{1,
+{04fa107e-4bd6-4aa0-81f6-7a56d56e31ed,"1c-srv-dev",1,0,1000,66fabdbb-e144-46ad-985c-6b65baa65a52,0}
+},
+{0},
+{1,
+{66fabdbb-e144-46ad-985c-6b65baa65a52,"Центральный сервер",1540,"1c-srv-dev",1,
+{1,
+{1560,1591}
+},"","dgdfgdfgdgdf",0,0,8,256,1000,1,0,1,0,1,1541,0,0,300,""}
+},
+{1,
+{b9ee71af-d7c0-44c3-bb8a-cd67b58cf4f1,"Главный менеджер кластера","1c-srv-dev",1,1,66fabdbb-e144-46ad-985c-6b65baa65a52}
+},
+{0},
+{0},
+{0},
+{0},
+{0},
+{0,0},0,
+{0},
+{0},
+{0},
+{0},
+{0},
+{0},
+{0},
+{0},
+{0},450,
+{0},
+{0},
+{""},
+{""},
+{0},"ggfdghfgh"}

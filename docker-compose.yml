@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  log-exporter:
+    build:
+      context: ./src
+      dockerfile: ./BslLogExporter/Dockerfile
+    volumes:
+      - AppConfiguration.json:/app/AppConfiguration.json
+      - scripts:/app/scripts
