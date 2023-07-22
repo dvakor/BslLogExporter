@@ -11,4 +11,9 @@ public static class CollectionExtensions
     {
         return array.Length - 1;
     }
+
+    public static bool DiffersFrom<T>(this ICollection<T> left, ICollection<T> right) where T : IEquatable<T>
+    {
+        return left.Except(right).Any() && right.Except(left).Any();
+    }
 }

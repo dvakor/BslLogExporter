@@ -48,7 +48,7 @@ public class ClusterSourceFactory : AbstractSourceFactory<ClusterArguments>
             {
                 // Если ИБ была создана, а логи еще не появились,
                 // то дождемся создания папки с логами и заного перезагрузим источники
-                tokens.Add(new PollingChangeToken(() => Directory.Exists(logFolder)));
+                tokens.Add(new PollingChangeToken(() => Directory.Exists(logFolder), 500));
                 continue;
             }
             
