@@ -46,6 +46,20 @@ public sealed class CsScriptStorage : Dictionary<string, object>, IDisposable
 
         return value;
     }
+    
+    public async ValueTask<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+    {
+        if (TryGet<T>(key, out var value))
+        {
+            return value;
+        }
+        
+        value = await factory();
+        
+        Set(key, value!);
+
+        return value;
+    }
 
     public void Dispose()
     {
