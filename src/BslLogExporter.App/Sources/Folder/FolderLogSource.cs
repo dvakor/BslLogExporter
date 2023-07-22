@@ -18,7 +18,7 @@ public sealed class FolderLogSource : ILogSource, IDisposable
         Name = name;
     }
     
-    public IEnumerable<LogEntry> GetLogs(CancellationToken token)
+    public IEnumerable<BslLogEntry> GetLogs(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {

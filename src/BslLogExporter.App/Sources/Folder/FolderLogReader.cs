@@ -34,7 +34,7 @@ public class FolderLogReader
         NextFile();
     }
 
-    public LogEntry? GetNextEntry(CancellationToken token) => _reader?.GetNextEntry(token);
+    public BslLogEntry? GetNextEntry(CancellationToken token) => _reader?.GetNextEntry(token);
 
     public void ForwardTo(string file, long position)
     {

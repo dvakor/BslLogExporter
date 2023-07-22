@@ -1,6 +1,6 @@
 ﻿namespace LogExporter.Core.LogReader
 {
-    public class LogEntry
+    public class BslLogEntry
     {
         private static readonly DateTime DefaultDate = new(1970, 1, 1);
         

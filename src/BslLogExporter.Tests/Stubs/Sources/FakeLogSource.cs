@@ -19,7 +19,7 @@ public class FakeLogSource : ILogSource
         Name = name;
     }
 
-    public IEnumerable<LogEntry> GetLogs(CancellationToken token)
+    public IEnumerable<BslLogEntry> GetLogs(CancellationToken token)
     {
         return _settings.CurrentValue.LogsProvider(Name, token);
     }

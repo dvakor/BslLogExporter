@@ -9,8 +9,8 @@ namespace BslLogExporter.Tests.Stubs.Sources;
 
 public class FakeSourceSettings
 {
-    public Func<string, CancellationToken, IEnumerable<LogEntry>> LogsProvider { get; set; } =
-        (_, _) => Array.Empty<LogEntry>();
+    public Func<string, CancellationToken, IEnumerable<BslLogEntry>> LogsProvider { get; set; } =
+        (_, _) => Array.Empty<BslLogEntry>();
     
     public Func<IChangeToken> ChangeToken { get; set; } = () => NullChangeToken.Singleton;
 }

@@ -25,7 +25,7 @@ public class LogsBuffer
         });
     }
     
-    public async ValueTask AddAsync(string source, LogEntry entry)
+    public async ValueTask AddAsync(string source, BslLogEntry entry)
     {
         await _buffer.Writer.WriteAsync(new SourceLog
         {
@@ -56,9 +56,9 @@ public class LogsBuffer
         }
     }
 
-    private async Task<Dictionary<string, List<LogEntry>>> ReadLogsInnerAsync(CancellationToken token)
+    private async Task<Dictionary<string, List<BslLogEntry>>> ReadLogsInnerAsync(CancellationToken token)
     {
-        var dict = new Dictionary<string, List<LogEntry>>();
+        var dict = new Dictionary<string, List<BslLogEntry>>();
         
         try
         {
@@ -68,7 +68,7 @@ public class LogsBuffer
             {
                 if (!dict.ContainsKey(log.SourceName))
                 {
-                    dict[log.SourceName] = new List<LogEntry>();
+                    dict[log.SourceName] = new List<BslLogEntry>();
                 }
 
                 dict[log.SourceName].Add(log.Entry);
@@ -93,7 +93,7 @@ public class LogsBuffer
     {
         public string SourceName { get; init; } = default!;
     
-        public LogEntry Entry { get; init; } = default!;
+        public BslLogEntry Entry { get; init; } = default!;
     }
         
 }

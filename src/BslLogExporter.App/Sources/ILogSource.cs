@@ -7,7 +7,7 @@ public interface ILogSource
 { 
     string Name { get; }
     
-    IEnumerable<LogEntry> GetLogs(CancellationToken token);
+    IEnumerable<BslLogEntry> GetLogs(CancellationToken token);
     
     void ForwardTo(HistoryRecord record);
 }
