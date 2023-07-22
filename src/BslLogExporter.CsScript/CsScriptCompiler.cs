@@ -26,14 +26,17 @@ public partial class CsScriptCompiler : ScriptCompiler
         
         _importedNamespaces = base.ImportedNamespaces.ToList();
         _importedNamespaces.Add("Microsoft.Extensions.Logging");
-
+        
         InitializeScriptEnvironment(settings.Value);
     }
 
     public override ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
     {
         var options = base.CreateScriptOptions(context, runtimeDependencies);
-        return options.AddReferences("Microsoft.Extensions.Logging");
+        return options
+            .AddReferences("Microsoft.Extensions.Logging")
+            .AddReferences("BslLogExporter.CsScript")
+            .AddReferences("BslLogExporter.Core");
     }
 
     public async Task<CsScriptExecutionContext> CreateExecutionContextAsync(string pathToFile, string[] args)
