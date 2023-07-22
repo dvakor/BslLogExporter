@@ -2,7 +2,7 @@
 
 using EasyNetQ;
 
-var bus = Storage.GerOrAdd<IBus>("Bus", () => RabbitHutch.CreateBus("host=localhost"));
+var bus = Storage.GetOrAdd<IBus>("Bus", () => RabbitHutch.CreateBus("host=localhost"));
 
 await bus.PubSub.PublishAsync(
     new {
