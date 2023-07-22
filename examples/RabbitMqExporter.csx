@@ -15,7 +15,7 @@ var exchange = await Storage.GetOrAddAsync<Exchange>("exchange",
 
 foreach (var entry in Context.Entries)
 {
-   var rmqEntry = new LogEntry
+   var rmqEntry = new RmqLogEntry
    {
       ServiceName = Context.SourceName,
       EnvironmentName = "Production",
@@ -37,7 +37,9 @@ foreach (var entry in Context.Entries)
       }
    };
 
-   await bus.Advanced.PublishAsync(exchange, string.Empty, true, new Message<LogEntry>(new LogEntry()));
+   await bus.Advanced.PublishAsync(
+    exchange, string.Empty, 
+    true, new Message<RmqLogEntry>(rmqEntry));
 }
 
 static LogEntryLevel MapLogLevel(string severity)
@@ -52,7 +54,7 @@ static LogEntryLevel MapLogLevel(string severity)
    };
 }
 
-public class LogEntry
+public class RmqLogEntry
 {
    public string? ServiceName { get; init; }
 
