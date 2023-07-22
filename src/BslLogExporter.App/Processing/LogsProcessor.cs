@@ -59,40 +59,58 @@ public class LogsProcessor
     {
         using var snapshot = _exportersManager.GetExporters();
         
-        await foreach (var portion in _buffer.GetLogsAsync(token))
+        if (!snapshot.Exporters.Any())
         {
-            var exporterForPortion = snapshot.GetExportersFor(portion.SourceName);
+            _logger.LogInformation("Экспортеры не найдены, ожидание добавления экспортеров");
+            await ChangeTokenAwaiter.WaitForTokenChange(snapshot.ChangeToken, token: token);
+            return;
+        }
+        
+        _logger.LogInformation("Начало экспорта логов");
+        
+        await using var changeTokenAwaiter = ChangeTokenAwaiter.Create(snapshot.ChangeToken, token: token);
+        
+        await foreach (var portion in _buffer.GetLogsAsync(changeTokenAwaiter.Token))
+        {
+            await ExportLogsAsync(snapshot, portion);
+        }
+        
+        _logger.LogInformation("Завершение экспорта логов");
+    }
 
-            if (!exporterForPortion.Any())
-            {
-                _logger.LogWarning("Экспортер для источника: {Source} не найден", portion.SourceName);
-                return;
-            }
-            
-            foreach (var exporter in exporterForPortion)
-            {
-                await exporter.ExportLogsAsync(portion);
-            }
+    private async Task ExportLogsAsync(LogExportersSnapshot snapshot, SourceLogPortion portion)
+    {
+        var exporterForPortion = snapshot.GetExportersFor(portion.SourceName);
 
-            var maxPositions = portion.Entries
-                .GroupBy(x => x.FileName)
-                .Select(x => new
-                {
-                    FileName = x.Key,
-                    MaxPosition = x.Max(e => e.Position)
-                })
-                .ToList();
-            
-            _logger.LogDebug("Экспортированы логи источика {Source} в количестве {Count}", 
-                portion.SourceName, portion.Entries.Count);
+        if (!exporterForPortion.Any())
+        {
+            _logger.LogWarning("Экспортер для источника: {Source} не найден", portion.SourceName);
+            return;
+        }
 
-            foreach (var position in maxPositions)
+        foreach (var exporter in exporterForPortion)
+        {
+            await exporter.ExportLogsAsync(portion);
+        }
+
+        var maxPositions = portion.Entries
+            .GroupBy(x => x.FileName)
+            .Select(x => new
             {
-                await _historyStorage.SaveHistoryAsync(
-                    portion.SourceName,
-                    position.FileName,
-                    position.MaxPosition);
-            }
+                FileName = x.Key,
+                MaxPosition = x.Max(e => e.Position)
+            })
+            .ToList();
+
+        _logger.LogDebug("Экспортированы логи источика {Source} в количестве {Count}",
+            portion.SourceName, portion.Entries.Count);
+
+        foreach (var position in maxPositions)
+        {
+            await _historyStorage.SaveHistoryAsync(
+                portion.SourceName,
+                position.FileName,
+                position.MaxPosition);
         }
     }
 
