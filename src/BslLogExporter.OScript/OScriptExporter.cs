@@ -1,6 +1,5 @@
 using LogExporter.App.Exporters;
 using LogExporter.App.Processing;
-using Microsoft.Extensions.Logging;
 using ScriptEngine.HostedScript.Library;
 using ScriptEngine.Machine;
 

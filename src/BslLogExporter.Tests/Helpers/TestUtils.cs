@@ -1,3 +1,6 @@
+using System.IO;
+using System.Threading.Tasks;
+
 namespace BslLogExporter.Tests.Helpers;
 
 public static class TestUtils
