@@ -1,4 +1,3 @@
-using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using LogExporter.App.Exporters;
 using Microsoft.Extensions.Configuration;

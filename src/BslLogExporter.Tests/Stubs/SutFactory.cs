@@ -1,3 +1,4 @@
+using System;
 using BslLogExporter.Tests.Helpers;
 using LogExporter.App.Exporters;
 using LogExporter.App.Sources;

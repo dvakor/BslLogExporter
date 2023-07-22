@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using LogExporter.App.Exporters;
 using LogExporter.App.Processing;
 

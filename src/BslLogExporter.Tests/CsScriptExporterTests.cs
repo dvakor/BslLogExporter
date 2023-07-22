@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using BslLogExporter.CsScript;
 using BslLogExporter.Tests.Stubs;
 using LogExporter.App.Processing;
