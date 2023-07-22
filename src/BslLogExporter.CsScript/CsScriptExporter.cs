@@ -1,40 +1,35 @@
 using LogExporter.App.Exporters;
 using LogExporter.App.Processing;
+using Microsoft.Extensions.Logging;
 
 namespace BslLogExporter.CsScript;
 
 public sealed class CsScriptExporter : ILogExporter, IDisposable
 {
-    private readonly string _scriptPath;
-    private readonly string[] _scriptArgs;
-    private readonly CsScriptCompiler _compiler;
-    private readonly CsScriptExecutor _executor;
+    private readonly ILogger<CsScriptExporter> _logger;
     
-    internal CsScriptExecutionContext? Context { get; private set; }
+    internal CsScriptExecutionContext ExecutionContext { get; }
 
-    public CsScriptExporter(
-        string scriptPath, string[] scriptArgs, 
-        CsScriptCompiler compiler, CsScriptExecutor executor)
+    public CsScriptExporter(CsScriptExecutionContext executionContext, ILoggerFactory factory)
     {
-        _scriptPath = scriptPath;
-        _scriptArgs = scriptArgs;
-        _compiler = compiler;
-        _executor = executor;
+        ExecutionContext = executionContext;
+        _logger = factory.CreateLogger<CsScriptExporter>();
     }
     
-    public async Task ExportLogsAsync(SourceLogPortion portion)
+    public async ValueTask ExportLogsAsync(SourceLogPortion portion)
     {
-        Context ??= await _compiler.CreateExecutionContextAsync(_scriptPath, _scriptArgs);
-
-        await _executor.ExecuteAsync(Context, new CsScriptContext
+        var context = new CsScriptContext
         {
+            Log = _logger,
+            Args = ExecutionContext.ScriptArgs,
+            Storage = ExecutionContext.Storage,
             Entries = portion.Entries,
             SourceName = portion.SourceName
-        });
+        };
     }
 
     public void Dispose()
     {
-        Context?.Dispose();
+        ExecutionContext.Dispose();
     }
 }

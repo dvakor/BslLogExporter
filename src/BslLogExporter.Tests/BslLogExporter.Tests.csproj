@@ -44,4 +44,15 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Files\TestExporterAsync.cs" />
+      <Content Include="Files\TestExporterAsync.cs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Compile Remove="Files\TestExporterSync.cs" />
+      <Content Include="Files\TestExporterSync.cs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

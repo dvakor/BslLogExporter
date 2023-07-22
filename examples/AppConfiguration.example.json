@@ -16,7 +16,7 @@
   // Настройки движка Dotnet-script
   "CsScript": {
     "TargetFramework": "net7.0", // целевая версия .net на которой будут компилироваться скрипты
-    "CacheDirectory": "{WorkingDir}/csx_cache" // путь к папке с кешем билдов
+    "CacheDirectory": "{WorkingDir}/scripts_cache" // путь к папке с кешем билдов
   },
   // Настройки движка OneScript
   "OneScript": {

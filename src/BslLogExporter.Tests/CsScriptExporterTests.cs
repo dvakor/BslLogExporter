@@ -25,25 +25,25 @@ public class CsScriptExporterTests
         _settings = mock.Object;
     }
     
-    [Fact]
-    public async Task Should_Compile_And_Run_Script()
+    [Theory]
+    [InlineData("TestExporterSync.cs")]
+    [InlineData("TestExporterAsync.cs")]
+    public async Task Should_Compile_And_Run_Script(string scriptName)
     {
         var factory = TestOutputLoggerFactory.Create(_testOutputHelper);
 
-        var compiler = new CsScriptCompiler(_settings, factory);
+        var compiler = new CsScriptCompiler(_settings);
 
-        var executor = new CsScriptExecutor(compiler, factory);
-        
         var exporter = SutFactory.CreateExporter(new CSharpScriptArgs
             {
-                PathToScript = "./Files/TestScript.csx",
+                PathToScript = $"./Files/{scriptName}",
                 ScriptArgs = new [] {"Hello"}
             }, 
-            () => new CsScriptExporterFactory(compiler, executor));
+            () => new CsScriptExporterFactory(compiler, factory));
 
-        var record = await Record.ExceptionAsync(() =>
+        var record = await Record.ExceptionAsync(async () =>
         {
-            return exporter.ExportLogsAsync(new SourceLogPortion
+            await exporter.ExportLogsAsync(new SourceLogPortion
             {
                 SourceName = "TestSource",
                 Entries = new LogEntry[] { 
@@ -64,15 +64,13 @@ public class CsScriptExporterTests
     {
         var factory = TestOutputLoggerFactory.Create(_testOutputHelper);
 
-        var compiler = new CsScriptCompiler(_settings, factory);
-
-        var executor = new CsScriptExecutor(compiler, factory);
+        var compiler = new CsScriptCompiler(_settings);
         
         var exporter = (CsScriptExporter)SutFactory.CreateExporter(new CSharpScriptArgs
             {
                 PathToScript = "./Files/TestExporter.csx"
             }, 
-            () => new CsScriptExporterFactory(compiler, executor));
+            () => new CsScriptExporterFactory(compiler, factory));
 
         var portion = new SourceLogPortion
         {
@@ -91,7 +89,7 @@ public class CsScriptExporterTests
         
         await exporter.ExportLogsAsync(portion);
 
-        var totalLogs = exporter.Context!.Storage.Get<int>("Count");
+        var totalLogs = exporter.ExecutionContext.Storage.Get<int>("Count");
         
         Assert.StrictEqual(2, totalLogs);
     }

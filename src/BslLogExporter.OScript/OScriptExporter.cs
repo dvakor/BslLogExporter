@@ -1,6 +1,5 @@
 using LogExporter.App.Exporters;
 using LogExporter.App.Processing;
-using Microsoft.Extensions.Logging;
 using ScriptEngine.HostedScript.Library;
 using ScriptEngine.Machine;
 
@@ -15,7 +14,7 @@ public sealed class OScriptExporter : ILogExporter, IDisposable
         ExecutionContext = context;
     }
 
-    public Task ExportLogsAsync(SourceLogPortion portion)
+    public ValueTask ExportLogsAsync(SourceLogPortion portion)
     {
         var osEntries = portion.Entries.Select(x => new OScriptLogEntry(x));
         var osArray = new ArrayImpl(osEntries);
@@ -29,7 +28,7 @@ public sealed class OScriptExporter : ILogExporter, IDisposable
         ExecutionContext.GlobalContext.EngineInstance.UpdateContexts();
         ExecutionContext.GlobalContext.EngineInstance.InitializeSDO(ExecutionContext.Instance);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     public void Dispose()

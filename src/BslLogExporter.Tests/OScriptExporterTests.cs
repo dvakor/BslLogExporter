@@ -38,9 +38,9 @@ public class OScriptExporterTests
             }, 
             () => new OScriptExporterFactory(_settings, factory));
 
-        var record = await Record.ExceptionAsync(() =>
+        var record = await Record.ExceptionAsync(async () =>
         {
-            return exporter.ExportLogsAsync(new SourceLogPortion
+            await exporter.ExportLogsAsync(new SourceLogPortion
             {
                 SourceName = "TestSource",
                 Entries = new LogEntry[] { 

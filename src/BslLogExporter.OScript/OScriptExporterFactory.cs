@@ -25,13 +25,14 @@ public class OScriptExporterFactory : AbstractExporterFactory<OScriptArgs>
     
     protected override ILogExporter CreateExporter(OScriptArgs args)
     {
-        Guard.Against.NullOrWhiteSpace(args.PathToScript);
         var context = CreateExecutionContext(args);
         return new OScriptExporter(context);
     }
     
     private OScriptExecutionContext CreateExecutionContext(OScriptArgs args)
     {
+        Guard.Against.NullOrWhiteSpace(args.PathToScript);
+        
         var fi = new FileInfo(args.PathToScript);
 
         if (!fi.Exists)
@@ -39,8 +40,10 @@ public class OScriptExporterFactory : AbstractExporterFactory<OScriptArgs>
             throw new FileNotFoundException(fi.FullName);
         }
 
+        var scriptArgs = args.ScriptArgs ?? Array.Empty<string>();
+
         var engine = CreateEngine();
-        var host = new OScriptAppHost(args.ScriptArgs ?? Array.Empty<string>(), _loggerFactory);
+        var host = new OScriptAppHost(scriptArgs, _loggerFactory);
         var source = new OScriptCodeSource(args.PathToScript);
 
         var globalContext = new SystemGlobalContext

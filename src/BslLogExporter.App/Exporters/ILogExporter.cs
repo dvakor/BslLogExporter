@@ -4,5 +4,5 @@ namespace LogExporter.App.Exporters;
 
 public interface ILogExporter
 {
-    Task ExportLogsAsync(SourceLogPortion portion);
+    ValueTask ExportLogsAsync(SourceLogPortion portion);
 }
