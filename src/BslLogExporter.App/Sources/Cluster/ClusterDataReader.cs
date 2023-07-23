@@ -3,12 +3,15 @@ using LogExporter.App.Helpers;
 using LogExporter.Core.Brackets;
 using LogExporter.Core.Extensions;
 using LogExporter.Core.Watchers;
+using Polly;
 
 namespace LogExporter.App.Sources.Cluster
 {
     public sealed class ClusterDataReader
     {
         private const string FileName = "1CV8Clst.lst";
+        private static readonly Policy Policy 
+            = HelperMethods.CreateRetryPolicy<FileNotFoundException>(3);
 
 #pragma warning disable CA1822
         // ReSharper disable once MemberCanBeMadeStatic.Global
@@ -67,7 +70,7 @@ namespace LogExporter.App.Sources.Cluster
             string pathToFile,
             ICollection<ClusterInfoBase> ibSnapshot)
         {
-            if (fileWatcher.DetectChanges() == FileChange.None)
+            if (Policy.Execute(fileWatcher.DetectChanges) == FileChange.None)
             {
                 return false;
             }
