@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using LogExporter.App.Sources;
 using Microsoft.Extensions.Options;
 

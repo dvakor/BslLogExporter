@@ -5,10 +5,12 @@ namespace BslLogExporter.Tests.Stubs.Exporters;
 
 public class FakeExporterFactory : ILogExporterFactory
 {
-    public string TypeName => "Fake";
+    private static readonly FakeExporter _exporter = new();
     
+    public string TypeName => "Fake";
+
     public ILogExporter CreateExporter(IConfigurationSection args)
     {
-        return new FakeExporter();
+        return _exporter;
     }
 }

@@ -33,9 +33,9 @@ public class LogsReaderBackgroundService : BackgroundService
             {
                 await _processingManager.PublishLogsAsync(stoppingToken);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
-                // NoOp;
+                _logger.LogInformation(e, "Операция чтения прервана");
             }
         }
         

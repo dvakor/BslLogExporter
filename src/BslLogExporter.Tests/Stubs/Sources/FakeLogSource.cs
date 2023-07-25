@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
 using LogExporter.App.History;
 using LogExporter.App.Sources;
 using LogExporter.Core.LogReader;

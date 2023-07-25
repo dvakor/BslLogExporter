@@ -10,9 +10,9 @@ public sealed class LogExportersSnapshot : IDisposable
 
     private readonly ConcurrentDictionary<string, IReadOnlyCollection<ILogExporter>> _sourcesExporters = new();
 
-    public IChangeToken ChangeToken { get; init; }
+    public IChangeToken ChangeToken { get; init; } = default!;
     
-    public IReadOnlyList<KeyValuePair<string, ILogExporter>> Exporters { get; init; }
+    public IReadOnlyList<KeyValuePair<string, ILogExporter>> Exporters { get; init; } = default!;
 
     public IReadOnlyCollection<ILogExporter> GetExportersFor(string source)
     {

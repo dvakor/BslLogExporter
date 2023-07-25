@@ -30,12 +30,11 @@ public class LogsProcessor
     
     public async Task PublishLogsAsync(CancellationToken token)
     {
-        using var snapshot = _sourcesManager.GetSources(token);
-
-        if (!snapshot.Sources.Any())
+        using var snapshot = _sourcesManager.GetSources();
+        
+        if (token.IsCancellationRequested 
+            || !await EnsureSourcesAsync(snapshot, token))
         {
-            _logger.LogInformation("Источники не найдены, ожидание добавления источников");
-            await ChangeTokenAwaiter.WaitForTokenChange(snapshot.ChangeToken, token: token);
             return;
         }
         
@@ -58,11 +57,10 @@ public class LogsProcessor
     public async Task ProcessLogsAsync(CancellationToken token)
     {
         using var snapshot = _exportersManager.GetExporters();
-        
-        if (!snapshot.Exporters.Any())
+
+        if (token.IsCancellationRequested
+            || !await EnsureExportersAsync(snapshot, token))
         {
-            _logger.LogInformation("Экспортеры не найдены, ожидание добавления экспортеров");
-            await ChangeTokenAwaiter.WaitForTokenChange(snapshot.ChangeToken, token: token);
             return;
         }
         
@@ -112,6 +110,36 @@ public class LogsProcessor
                 position.FileName,
                 position.MaxPosition);
         }
+    }
+    
+    private async ValueTask<bool> EnsureSourcesAsync(LogSourcesSnapshot snapshot, CancellationToken token)
+    {
+        if (!snapshot.Sources.Any())
+        {
+            _logger.LogInformation("Источники не найдены, ожидание добавления источников");
+            await ChangeTokenAwaiter.WaitForTokenChange(snapshot.ChangeToken, token: token);
+            return false;
+        }
+        
+        var sourcesNames = snapshot
+            .Sources
+            .Select(x => x.Name);
+
+        _logger.LogInformation("Загружены источники: {Sources}", sourcesNames.ToList());
+
+        return true;
+    }
+    
+    private async ValueTask<bool> EnsureExportersAsync(LogExportersSnapshot snapshot, CancellationToken token)
+    {
+        if (!snapshot.Exporters.Any())
+        {
+            _logger.LogInformation("Экспортеры не найдены, ожидание добавления экспортеров");
+            await ChangeTokenAwaiter.WaitForTokenChange(snapshot.ChangeToken, token: token);
+            return false;
+        }
+
+        return true;
     }
 
     private async ValueTask PrepareReadersAsync(
