@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
 using LogExporter.App.History;
 using LogExporter.App.Sources;
 using LogExporter.Core.LogReader;
@@ -19,7 +17,7 @@ public class FakeLogSource : ILogSource
         Name = name;
     }
 
-    public IEnumerable<LogEntry> GetLogs(CancellationToken token)
+    public IEnumerable<BslLogEntry> GetLogs(CancellationToken token)
     {
         return _settings.CurrentValue.LogsProvider(Name, token);
     }

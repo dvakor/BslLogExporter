@@ -6,5 +6,5 @@ public class SourceLogPortion
 {
     public string SourceName { get; init; }
     
-    public IReadOnlyCollection<LogEntry> Entries { get; init; } 
+    public IReadOnlyCollection<BslLogEntry> Entries { get; init; } 
 }

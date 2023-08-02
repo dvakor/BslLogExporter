@@ -3,6 +3,7 @@ using Ardalis.GuardClauses;
 using LogExporter.App.Helpers;
 using LogExporter.App.Sources.Folder;
 using Microsoft.Extensions.Primitives;
+using Polly;
 
 namespace LogExporter.App.Sources.Cluster;
 
@@ -10,6 +11,8 @@ public class ClusterSourceFactory : AbstractSourceFactory<ClusterArguments>
 {
     private const RegexOptions Options = RegexOptions.CultureInvariant | RegexOptions.IgnoreCase;
     private readonly ClusterDataReader _reader;
+    private static readonly Policy Policy 
+        = HelperMethods.CreateRetryPolicy<FileNotFoundException>(10, 1000); 
     
     public override string TypeName => "Cluster";
 
@@ -22,7 +25,7 @@ public class ClusterSourceFactory : AbstractSourceFactory<ClusterArguments>
     {
         Guard.Against.NullOrWhiteSpace(args.FolderPath);
 
-        var infoBasesResult = _reader.GetInfoBases(args.FolderPath);
+        var infoBasesResult = Policy.Execute(() => _reader.GetInfoBases(args.FolderPath));
         
         var infobases = infoBasesResult
             .InfoBases
@@ -48,7 +51,7 @@ public class ClusterSourceFactory : AbstractSourceFactory<ClusterArguments>
             {
                 // Если ИБ была создана, а логи еще не появились,
                 // то дождемся создания папки с логами и заного перезагрузим источники
-                tokens.Add(new PollingChangeToken(() => Directory.Exists(logFolder)));
+                tokens.Add(new PollingChangeToken(() => Directory.Exists(logFolder), 500));
                 continue;
             }
             

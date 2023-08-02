@@ -1,8 +1,4 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BslLogExporter.Tests.Helpers;
 using BslLogExporter.Tests.Stubs;
 using LogExporter.App.Helpers;
@@ -79,7 +75,7 @@ public class ClusterSourceTests
         using var initialFilteredSource = CreateSource(tempFolder.FullName, "TestIb_2");
 
         await TestUtils.ReplaceInFile(listFile, "TestIb_3", "TestIb_4");
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         await ChangeTokenAwaiter.WaitForTokenChange(initialSource.ChangeToken, token: cts.Token);
         
         using var actualSource = CreateSource(tempFolder.FullName);

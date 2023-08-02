@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LogExporter.Core.Extensions;
 
 namespace LogExporter.Core.Watchers
 {
@@ -31,7 +32,7 @@ namespace LogExporter.Core.Watchers
             
             var newFiles = GetFiles();
 
-            if (!CurrentFiles.Except(newFiles).Any() && !newFiles.Except(CurrentFiles).Any())
+            if (!newFiles.DiffersFrom(CurrentFiles))
             {
                 return DirectoryChange.None;
             }

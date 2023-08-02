@@ -1,71 +1,48 @@
 using System.Reflection;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace LogExporter.App.Exporters;
 
-public sealed class LogExportersManager : IDisposable
+public sealed class LogExportersManager
 {
     private readonly IConfiguration _configuration;
     private readonly IEnumerable<ILogExporterFactory> _factories;
-    private readonly ILogger<LogExportersManager> _logger;
-    private readonly object _lockObj = new();
-
-    private LogExportersSnapshot? _exportersSnapshot;
 
     public LogExportersManager(
         IConfiguration configuration,
-        IEnumerable<ILogExporterFactory> factories,
-        ILogger<LogExportersManager> logger)
+        IEnumerable<ILogExporterFactory> factories)
     {
         _factories = factories;
         _configuration = configuration;
-        _logger = logger;
     }
 
-    public LogExportersSnapshot GetExporters()
-    {
-        lock (_lockObj)
-        {
-            if (_exportersSnapshot is null or { ChangeToken.HasChanged: true })
-            {
-                LoadExporters();
-            }
-        
-            return _exportersSnapshot!;
-        }
-    }
+    public LogExportersSnapshot GetExporters() 
+        => CreateExporters();
 
     public void Validate()
     {
-        lock (_lockObj)
+        try
         {
-            try
-            {
-                LoadExporters();
-            }
-            catch (Exception e)
-            {
-                throw new ExportersValidationException(e);
-            }
+            using var _ = CreateExporters();
+        }
+        catch (Exception e)
+        {
+            throw new ExportersValidationException(e);
         }
     }
 
-    private void LoadExporters()
+    private LogExportersSnapshot CreateExporters()
     {
         var exportersConfiguration = _configuration.GetSection("Exporters");
 
         var exporters = new List<KeyValuePair<string, ILogExporter>>();
-        var exportersNames = new List<string>();
 
         foreach (var section in exportersConfiguration.GetChildren())
         {
             var type = section.GetSection("Type").Get<string>();
             var pattern = section.GetSection("SourceFilter").Get<string>();
             
-            exportersNames.Add($"{type}:{pattern}");
-
             Guard.Against.NullOrWhiteSpace(type);
             Guard.Against.NullOrWhiteSpace(pattern);
             
@@ -76,9 +53,7 @@ public sealed class LogExportersManager : IDisposable
             exporters.Add(new KeyValuePair<string, ILogExporter>(pattern, exporter));
         }
         
-        _logger.LogInformation("Список экспортеров обновлен {@Exporters}", exportersNames);
-
-        _exportersSnapshot = new LogExportersSnapshot
+        return new LogExportersSnapshot
         {
             ChangeToken = _configuration.GetReloadToken(),
             Exporters = exporters
@@ -97,10 +72,5 @@ public sealed class LogExportersManager : IDisposable
             > 1 => throw new AmbiguousMatchException(type),
             _ => throw new UnknownExporterTypeException(type)
         };
-    }
-
-    public void Dispose()
-    {
-        _exportersSnapshot?.Dispose();
     }
 }

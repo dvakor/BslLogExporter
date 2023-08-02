@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace BslLogExporter.Tests.Helpers;
 
 public sealed class TempFolder : IDisposable

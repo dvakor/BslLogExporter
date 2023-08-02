@@ -1,54 +1,34 @@
 using System.Reflection;
+using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace LogExporter.App.Sources;
 
-public sealed class LogSourcesManager : IDisposable
+public sealed class LogSourcesManager
 {
     private readonly IConfiguration _configuration;
     private readonly IEnumerable<ILogSourceFactory> _factories;
-    private readonly ILogger<LogSourcesManager> _logger;
-    private readonly object _lockObj = new();
-    
-    private LogSourcesSnapshot? _sources;
-    
+
     public LogSourcesManager(
         IConfiguration configuration,
-        IEnumerable<ILogSourceFactory> factories,
-        ILogger<LogSourcesManager> logger)
+        IEnumerable<ILogSourceFactory> factories)
     {
         _configuration = configuration;
         _factories = factories;
-        _logger = logger;
     }
 
-    public LogSourcesSnapshot GetSources(CancellationToken token)
-    {
-        lock (_lockObj)
-        {
-            if (_sources is null or { ChangeToken.HasChanged: true })
-            {
-                LoadSources();
-            }
-
-            return _sources!;
-        }
-    }
+    public LogSourcesSnapshot GetSources() => CreateSources();
     
     public void Validate()
     {
-        lock (_lockObj)
+        try
         {
-            try
-            {
-                LoadSources();
-            }
-            catch (Exception e)
-            {
-                throw new SourcesValidationException(e);
-            }
+            using var _ = CreateSources();
+        }
+        catch (Exception e)
+        {
+            throw new SourcesValidationException(e);
         }
     }
 
@@ -66,7 +46,7 @@ public sealed class LogSourcesManager : IDisposable
         };
     }
 
-    private void LoadSources()
+    private LogSourcesSnapshot CreateSources()
     {
         var tokens = new List<IChangeToken>
         {
@@ -80,6 +60,9 @@ public sealed class LogSourcesManager : IDisposable
         foreach (var section in sourceConfiguration.GetChildren())
         {
             var type = section.GetSection("Type").Get<string>();
+
+            Guard.Against.Null(type);
+            
             var factory = FindFactory(type);
             var sourceFromCurrentSection = factory.CreateSources(
                 section.GetSection("Args"));
@@ -88,21 +71,10 @@ public sealed class LogSourcesManager : IDisposable
             tokens.Add(sourceFromCurrentSection.ChangeToken);
         }
 
-        var sourceNames = sources
-            .Select(x => x.Name)
-            .ToList();
-        
-        _logger.LogInformation("Список источников обновлен {@Sources}", sourceNames);
-
-        _sources = new LogSourcesSnapshot
+        return new LogSourcesSnapshot
         {
             Sources = sources,
             ChangeToken = new CompositeChangeToken(tokens)
         };
-    }
-
-    public void Dispose()
-    {
-        _sources?.Dispose();
     }
 }

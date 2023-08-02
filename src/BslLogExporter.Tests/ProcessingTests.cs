@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BslLogExporter.Tests.Host;
 using BslLogExporter.Tests.Stubs.Exporters;
 using BslLogExporter.Tests.Stubs.Sources;
@@ -54,7 +50,7 @@ public class ProcessingTests
         
         Assert.True(exporter.Portions.Count > 0);
 
-        IEnumerable<LogEntry> LogsProvider(string sourceName, CancellationToken token)
+        IEnumerable<BslLogEntry> LogsProvider(string sourceName, CancellationToken token)
         {
             if (current > 0)
             {
@@ -63,7 +59,7 @@ public class ProcessingTests
             
             for (var i = current; i < totalLogs; i++)
             {
-                yield return new LogEntry
+                yield return new BslLogEntry
                 {
                     FileName = "Generated",
                     Position = i + 1

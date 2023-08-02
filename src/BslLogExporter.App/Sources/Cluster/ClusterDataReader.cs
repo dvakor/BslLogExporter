@@ -3,37 +3,50 @@ using LogExporter.App.Helpers;
 using LogExporter.Core.Brackets;
 using LogExporter.Core.Extensions;
 using LogExporter.Core.Watchers;
+using Polly;
 
 namespace LogExporter.App.Sources.Cluster
 {
     public sealed class ClusterDataReader
     {
         private const string FileName = "1CV8Clst.lst";
-        
-        public ClusterInfoBases GetInfoBases(string folder)
+        private static readonly Policy Policy 
+            = HelperMethods.CreateRetryPolicy<FileNotFoundException>(3);
+
+#pragma warning disable CA1822
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public ClusterInfoBasesSnapshot GetInfoBases(string folder)
+#pragma warning restore CA1822
         {
             Guard.Against.NullOrWhiteSpace(folder);
 
             var pathToFile = Path.Combine(folder, FileName);
-            
-            using var reader = new BracketsParser(pathToFile);
 
+            var infoBases = ReadInfoBases(pathToFile);
+            
+            var fileWatcher = new FileWatcher(pathToFile);
+            
+            var result = new ClusterInfoBasesSnapshot
+            {
+                ChangeToken = new PollingChangeToken(() 
+                    => InfoBaseListChanged(fileWatcher, pathToFile, infoBases), 1000),
+                InfoBases = infoBases
+            };
+            
+            return result;
+        }
+
+        private static List<ClusterInfoBase> ReadInfoBases(string pathToFile)
+        {
+            using var reader = new BracketsParser(pathToFile);
+            
             var node = reader.GetNextItem();
 
             var infoBases = new List<ClusterInfoBase>();
-
-            var fileWatcher = new FileWatcher(pathToFile);
             
-            var result = new ClusterInfoBases
-            {
-                ChangeToken = new PollingChangeToken(() 
-                    => fileWatcher.DetectChanges() != FileChange.None),
-                InfoBases = infoBases
-            };
-
             if (node == null)
             {
-                return result;
+                return infoBases;
             }
 
             var ibNodes = node.Node(2);
@@ -48,8 +61,23 @@ namespace LogExporter.App.Sources.Cluster
                     Name = ibNode.Value(1).Value
                 });
             }
+            
+            return infoBases;
+        }
 
-            return result;
+        private static bool InfoBaseListChanged(
+            FileWatcher fileWatcher,
+            string pathToFile,
+            ICollection<ClusterInfoBase> ibSnapshot)
+        {
+            if (Policy.Execute(fileWatcher.DetectChanges) == FileChange.None)
+            {
+                return false;
+            }
+
+            var actualIb = ReadInfoBases(pathToFile);
+
+            return actualIb.DiffersFrom(ibSnapshot);
         }
     }
 }

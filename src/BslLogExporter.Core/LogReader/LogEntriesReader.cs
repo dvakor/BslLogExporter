@@ -16,7 +16,7 @@ namespace LogExporter.Core.LogReader
             _metadataReader = metadataReader;
         }
 
-        public LogEntry? GetNextEntry(CancellationToken cancellationToken = default)
+        public BslLogEntry? GetNextEntry(CancellationToken cancellationToken = default)
         {
             var node = ReadNext(cancellationToken);
 
@@ -35,9 +35,9 @@ namespace LogExporter.Core.LogReader
             }
         }
 
-        private LogEntry ParseLogItem(BracketsNodeValue node, CancellationToken cancellationToken)
+        private BslLogEntry ParseLogItem(BracketsNodeValue node, CancellationToken cancellationToken)
         {
-            var item = new LogEntry
+            var item = new BslLogEntry
             {
                 FileName = FileName,
                 DateTime = node.Value(0).ToDateTime(),

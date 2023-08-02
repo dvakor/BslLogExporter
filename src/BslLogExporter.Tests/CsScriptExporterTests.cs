@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using BslLogExporter.CsScript;
 using BslLogExporter.Tests.Stubs;
 using LogExporter.App.Processing;
@@ -47,7 +46,7 @@ public class CsScriptExporterTests
             return exporter.ExportLogsAsync(new SourceLogPortion
             {
                 SourceName = "TestSource",
-                Entries = new LogEntry[] { 
+                Entries = new BslLogEntry[] { 
                     new()
                     {
                         FileName = "Generated",
@@ -78,7 +77,7 @@ public class CsScriptExporterTests
         var portion = new SourceLogPortion
         {
             SourceName = "TestSource",
-            Entries = new LogEntry[]
+            Entries = new BslLogEntry[]
             {
                 new()
                 {

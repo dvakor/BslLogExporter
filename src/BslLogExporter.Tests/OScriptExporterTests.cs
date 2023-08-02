@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using BslLogExporter.OScript;
 using BslLogExporter.Tests.Stubs;
 using LogExporter.App.Processing;
@@ -44,7 +43,7 @@ public class OScriptExporterTests
             return exporter.ExportLogsAsync(new SourceLogPortion
             {
                 SourceName = "TestSource",
-                Entries = new LogEntry[] { 
+                Entries = new BslLogEntry[] { 
                     new()
                     {
                         FileName = "Generated",
@@ -72,7 +71,7 @@ public class OScriptExporterTests
         var portion = new SourceLogPortion
         {
             SourceName = "TestSource",
-            Entries = new LogEntry[]
+            Entries = new BslLogEntry[]
             {
                 new()
                 {

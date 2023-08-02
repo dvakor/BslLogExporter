@@ -38,11 +38,12 @@ public class PollingChangeToken : IChangeToken
 
         if (_lastResult)
         {
-            _stopwatch.Restart();
+            _stopwatch.Reset();
+            _stopwatch.Stop();
         }
         else
         {
-            _stopwatch.Stop();
+            _stopwatch.Restart();
         }
 
         return _lastResult;

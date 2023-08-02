@@ -7,9 +7,9 @@ namespace BslLogExporter.OScript;
 [ContextClass("ЗаписьЛога")]
 public class OScriptLogEntry : AutoContext<OScriptLogEntry>
 {
-    private readonly LogEntry _entry;
+    private readonly BslLogEntry _entry;
 
-    public OScriptLogEntry(LogEntry entry)
+    public OScriptLogEntry(BslLogEntry entry)
     {
         _entry = entry;
     }

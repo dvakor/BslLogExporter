@@ -1,4 +1,3 @@
-using System;
 using BslLogExporter.Tests.Helpers;
 using BslLogExporter.Tests.Stubs;
 using BslLogExporter.Tests.Stubs.Exporters;
