@@ -30,6 +30,11 @@ public class LogsProcessor
     
     public async Task PublishLogsAsync(CancellationToken token)
     {
+        if (token.IsCancellationRequested)
+        {
+            return;
+        }
+        
         using var snapshot = _sourcesManager.GetSources();
         
         if (token.IsCancellationRequested 
@@ -56,6 +61,11 @@ public class LogsProcessor
 
     public async Task ProcessLogsAsync(CancellationToken token)
     {
+        if (token.IsCancellationRequested)
+        {
+            return;
+        }
+        
         using var snapshot = _exportersManager.GetExporters();
 
         if (token.IsCancellationRequested

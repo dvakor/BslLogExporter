@@ -2,11 +2,15 @@ using LogExporter.App.Helpers;
 using LogExporter.App.Processing;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace LogExporter;
 
 public class LogsReaderBackgroundService : BackgroundService
 {
+    private static readonly AsyncPolicy Policy = HelperMethods
+        .CreateRetryAsyncPolicy<Exception>(5, 1000);
+    
     private readonly IHostApplicationLifetime _lifetime;
     private readonly LogsProcessor _processingManager;
     private readonly ILogger<LogsReaderBackgroundService> _logger;
@@ -31,7 +35,8 @@ public class LogsReaderBackgroundService : BackgroundService
         {
             try
             {
-                await _processingManager.PublishLogsAsync(stoppingToken);
+                await Policy.ExecuteAsync(async () => 
+                    await _processingManager.PublishLogsAsync(stoppingToken));
             }
             catch (OperationCanceledException e)
             {

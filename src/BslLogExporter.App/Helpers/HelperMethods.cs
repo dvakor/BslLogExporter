@@ -13,11 +13,18 @@ public static class HelperMethods
         }
     }
     
-    public static Policy CreateRetryPolicy<TException>(int retryTimes) where TException : Exception
+    public static Policy CreateRetryPolicy<TException>(int retryTimes, int multiplier = 100) where TException : Exception
     {
         return Policy
             .Handle<TException>()
             .WaitAndRetry(retryTimes, n
-                => TimeSpan.FromMilliseconds(100 * n));
+                => TimeSpan.FromMilliseconds(multiplier * n));
+    }
+    public static AsyncPolicy CreateRetryAsyncPolicy<TException>(int retryTimes, int multiplier = 100) where TException : Exception
+    {
+        return Policy
+            .Handle<TException>()
+            .WaitAndRetryAsync(retryTimes, n
+                => TimeSpan.FromMilliseconds(multiplier * n));
     }
 }

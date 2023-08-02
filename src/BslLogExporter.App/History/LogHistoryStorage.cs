@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace LogExporter.App.History;
@@ -9,14 +10,19 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
 {
     private const int SavePeriod = 1000;
     
-    private PositionsData? _history;
+    private readonly ILogger<LogHistoryStorage> _logger;
     private readonly FileStream _fs;
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly Stopwatch _stopwatch = new();
+    
+    private PositionsData? _history;
     private bool _hasChanges;
 
-    public LogHistoryStorage(IOptions<HistorySettings> settings)
+    public LogHistoryStorage(
+        IOptions<HistorySettings> settings,
+        ILogger<LogHistoryStorage> logger)
     {
+        _logger = logger;
         var historyFile = settings.Value.HistoryFile ?? "./history.json";
         _fs = File.Open(historyFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
         _stopwatch.Start();
@@ -70,12 +76,16 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
             return;
         }
 
+        _logger.LogDebug("История обновлена");
+        
         _fs.Seek(0, SeekOrigin.Begin);
 
         await JsonSerializer.SerializeAsync(_fs, _history, new JsonSerializerOptions
         {
             WriteIndented = true
         });
+        
+        await _fs.FlushAsync();
     }
 
     private async ValueTask<PositionsData> LoadHistoryAsync()
@@ -124,7 +134,6 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
         }
         
         _semaphore.Dispose();
-        await _fs.FlushAsync();
         await _fs.DisposeAsync();
     }
 }
