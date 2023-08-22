@@ -130,7 +130,16 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
     {
         if (_hasChanges)
         {
-            await SaveHistoryAsync();
+            await _semaphore.WaitAsync();
+            
+            try
+            {
+                await SaveHistoryAsync();
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         
         _semaphore.Dispose();
