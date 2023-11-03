@@ -78,7 +78,7 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
 
         _logger.LogDebug("История обновлена");
         
-        _fs.Seek(0, SeekOrigin.Begin);
+        _fs.SetLength(0);
 
         await JsonSerializer.SerializeAsync(_fs, _history, new JsonSerializerOptions
         {
@@ -130,7 +130,16 @@ public sealed class LogHistoryStorage : ILogHistoryStorage, IAsyncDisposable
     {
         if (_hasChanges)
         {
-            await SaveHistoryAsync();
+            await _semaphore.WaitAsync();
+            
+            try
+            {
+                await SaveHistoryAsync();
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         
         _semaphore.Dispose();
