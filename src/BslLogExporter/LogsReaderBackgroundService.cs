@@ -8,9 +8,7 @@ namespace LogExporter;
 
 public class LogsReaderBackgroundService : BackgroundService
 {
-    private static readonly AsyncPolicy Policy = HelperMethods
-        .CreateRetryAsyncPolicy<Exception>(5, 1000);
-    
+    private readonly AsyncPolicy _policy;
     private readonly IHostApplicationLifetime _lifetime;
     private readonly LogsProcessor _processingManager;
     private readonly ILogger<LogsReaderBackgroundService> _logger;
@@ -23,6 +21,9 @@ public class LogsReaderBackgroundService : BackgroundService
         _processingManager = processingManager;
         _logger = logger;
         _lifetime = lifetime;
+        
+        _policy = HelperMethods
+            .CreateInfinityRetryPolicy<Exception>(1000, OnRetry);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,8 +36,8 @@ public class LogsReaderBackgroundService : BackgroundService
         {
             try
             {
-                await Policy.ExecuteAsync(async () => 
-                    await _processingManager.PublishLogsAsync(stoppingToken));
+                await _policy.ExecuteAsync(ct 
+                    => _processingManager.PublishLogsAsync(ct), stoppingToken);
             }
             catch (OperationCanceledException e)
             {
@@ -45,5 +46,10 @@ public class LogsReaderBackgroundService : BackgroundService
         }
         
         _logger.LogInformation("Служба чтения логов остановлена");
+    }
+    
+    private void OnRetry(Exception exception, TimeSpan currentTimeout)
+    {
+        _logger.LogError(exception, "Ошибка чтения логов, текущий таймаут {Timeout}", currentTimeout);
     }
 }

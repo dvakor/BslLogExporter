@@ -27,4 +27,12 @@ public static class HelperMethods
             .WaitAndRetryAsync(retryTimes, n
                 => TimeSpan.FromMilliseconds(multiplier * n));
     }
+
+    public static AsyncPolicy CreateInfinityRetryPolicy<TException>(int multiplier, Action<Exception, TimeSpan> onRetry) where TException : Exception
+    {
+        return Policy
+            .Handle<TException>()
+            .WaitAndRetryForeverAsync(n 
+                => TimeSpan.FromMilliseconds(multiplier * n), onRetry);
+    }
 }

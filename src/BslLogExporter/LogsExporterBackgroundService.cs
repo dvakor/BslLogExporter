@@ -8,9 +8,7 @@ namespace LogExporter;
 
 public class LogsExporterBackgroundService : BackgroundService
 {
-    private static readonly AsyncPolicy Policy = HelperMethods
-        .CreateRetryAsyncPolicy<Exception>(5, 1000);
-    
+    private readonly AsyncPolicy _policy;
     private readonly LogsProcessor _processingManager;
     private readonly ILogger<LogsExporterBackgroundService> _logger;
     private readonly IHostApplicationLifetime _lifetime;
@@ -23,8 +21,11 @@ public class LogsExporterBackgroundService : BackgroundService
         _processingManager = processingManager;
         _logger = logger;
         _lifetime = lifetime;
-    }
 
+        _policy = HelperMethods
+            .CreateInfinityRetryPolicy<Exception>(1000, OnRetry);
+    }
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await _lifetime.ApplicationStarted.WaitForCancellation();
@@ -35,15 +36,20 @@ public class LogsExporterBackgroundService : BackgroundService
         {
             try
             {
-                await Policy.ExecuteAsync(async () =>
-                    await _processingManager.ProcessLogsAsync(stoppingToken));
+                await _policy.ExecuteAsync(ct
+                    => _processingManager.ProcessLogsAsync(ct), stoppingToken);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
-                // NoOp
+                _logger.LogInformation(e, "Операция обработки логов прервана");
             }
         }
         
         _logger.LogInformation("Служба обработки логов остановлена");
+    }
+    
+    private void OnRetry(Exception exception, TimeSpan currentTimeout)
+    {
+        _logger.LogError(exception, "Ошибка обработки логов, текущий таймаут {Timeout}", currentTimeout);
     }
 }
