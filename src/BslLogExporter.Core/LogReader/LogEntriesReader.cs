@@ -31,7 +31,7 @@ namespace LogExporter.Core.LogReader
             }
             catch (Exception e)
             {
-                throw new LogEntryParseException(node, FileName, e);
+                throw new LogEntryParseException(node, FilePath, e);
             }
         }
 
