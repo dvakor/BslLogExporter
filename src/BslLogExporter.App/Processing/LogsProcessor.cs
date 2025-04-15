@@ -170,7 +170,15 @@ public class LogsProcessor
                     source.Name, record.Position, record.File);
             }
             
-            source.ForwardTo(record);
+            try
+            {
+                source.ForwardTo(record);
+            }
+            catch (FileNotFoundException e)
+            {
+                _logger.LogError(e, "Не удалось перемотать лог к позиции {Position} в файле {File}, тк файла больше нет", 
+                    record.Position, record.File);
+            }
         }
     }
 }
