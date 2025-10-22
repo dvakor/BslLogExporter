@@ -38,20 +38,48 @@ public class FolderLogReader
 
     public void ForwardTo(string file, long position)
     {
+        _logFilesWatcher.DetectChanges();
+
         var fileFullPath = _logFilesWatcher.CurrentFiles.FirstOrDefault(x => x.EndsWith(file));
+
+        if (!string.IsNullOrEmpty(fileFullPath))
+        {
+            ChangeFile(fileFullPath, position);
+        }
         
-        if (string.IsNullOrEmpty(fileFullPath))
+        var nextFile = FindNextFileAfter(file);
+
+        if (nextFile != null)
+        {
+            ChangeFile(nextFile, 0);
+            return;
+        }
+
+        if (_logFilesWatcher.CurrentFiles.Length == 0)
         {
             throw new FileNotFoundException(file);
         }
         
-        ChangeFile(fileFullPath, position);
+        ChangeFile(_logFilesWatcher.CurrentFiles[0], 0);
+    }
+
+    private string? FindNextFileAfter(string fileName)
+    {
+        var targetFileName = Path.GetFileName(fileName);
+
+        var sortedFiles = _logFilesWatcher.CurrentFiles
+            .OrderBy(Path.GetFileName)
+            .ToArray();
+
+        return sortedFiles.FirstOrDefault(file 
+            => string.Compare(Path.GetFileName(file), targetFileName, StringComparison.Ordinal) > 0);
     }
 
     public bool NextFile()
     {
-        if (IsLastFile() 
-            && _logFilesWatcher.DetectChanges() == DirectoryChange.None)
+        var directoryChanged = _logFilesWatcher.DetectChanges() != DirectoryChange.None;
+
+        if (IsLastFile() && !directoryChanged)
         {
             return false;
         }
@@ -60,7 +88,27 @@ public class FolderLogReader
 
         if (_reader is not null)
         {
-            currentIndex = _logFilesWatcher.CurrentFiles.IndexOf(_reader?.FilePath);
+            currentIndex = _logFilesWatcher.CurrentFiles.IndexOf(_reader.FilePath);
+
+            if (currentIndex == -1)
+            {
+                var currentFileName = Path.GetFileName(_reader.FilePath);
+                var nextFile = FindNextFileAfter(currentFileName);
+
+                if (nextFile != null)
+                {
+                    ChangeFile(nextFile, 0);
+                    return true;
+                }
+
+                if (_logFilesWatcher.CurrentFiles.Length <= 0)
+                {
+                    return false;
+                }
+                
+                ChangeFile(_logFilesWatcher.CurrentFiles[0], 0);
+                return true;
+            }
         }
 
         var lastIndex = _logFilesWatcher.CurrentFiles.LastIndex();
@@ -69,11 +117,10 @@ public class FolderLogReader
         {
             return false;
         }
-        
-        ChangeFile(_logFilesWatcher.CurrentFiles[currentIndex+1], 0);
-            
-        return true;
 
+        ChangeFile(_logFilesWatcher.CurrentFiles[currentIndex + 1], 0);
+
+        return true;
     }
 
     private void ChangeFile(string file, long position)
@@ -102,8 +149,15 @@ public class FolderLogReader
         {
             return _logFilesWatcher.CurrentFiles.Length == 0;
         }
-        
-        var currentIndex = _logFilesWatcher.CurrentFiles.IndexOf(_reader?.FilePath);
+
+        var currentIndex = _logFilesWatcher.CurrentFiles.IndexOf(_reader.FilePath);
+
+        if (currentIndex == -1)
+        {
+            var currentFileName = Path.GetFileName(_reader.FilePath);
+            var nextFile = FindNextFileAfter(currentFileName);
+            return nextFile == null;
+        }
 
         return currentIndex >= _logFilesWatcher.CurrentFiles.LastIndex();
     }
