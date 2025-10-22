@@ -183,3 +183,7 @@ Example:
 - If C# scripts fail to compile with NU1100 error, place `NuGet.Config` in the working directory (see examples folder)
 - LiveMode only works on first export (when no history exists); subsequent exports resume from last position
 - Log reading continues even if a file from history no longer exists
+
+## Addtional instructions
+
+- Do not write any comments
