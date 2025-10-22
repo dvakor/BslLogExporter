@@ -91,9 +91,12 @@ namespace LogExporter.Core.Brackets
                         chars.Clear();
                         break;
                     }
-                    case not null:
+                    case not null when nodes.Count > 0:
                     {
-                        chars.Enqueue(_currentChar.Value);
+                        if (!char.IsWhiteSpace(_currentChar.Value))
+                        {
+                            chars.Enqueue(_currentChar.Value);
+                        }
                         break;
                     }
                 }
