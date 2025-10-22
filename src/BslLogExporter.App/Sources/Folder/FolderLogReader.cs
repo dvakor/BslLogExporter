@@ -45,6 +45,7 @@ public class FolderLogReader
         if (!string.IsNullOrEmpty(fileFullPath))
         {
             ChangeFile(fileFullPath, position);
+            return;
         }
         
         var nextFile = FindNextFileAfter(file);
